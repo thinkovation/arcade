@@ -1,0 +1,88 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+
+/**
+ * Shared game chrome — Card with header (back button, title, stat badges),
+ * a content area for the game board, a controls area, and a hint line.
+ *
+ * @param {Object}   props
+ * @param {string}   props.title      – e.g. "🐍 SNAKE"
+ * @param {Function} [props.onBack]   – If provided, renders a ← Back button
+ * @param {Array<{label:string, value:any, borderColor:string, textColor:string}>} props.stats
+ * @param {React.ReactNode} props.children   – Game board / canvas
+ * @param {React.ReactNode} [props.controls] – D-pad, fire button, etc.
+ * @param {React.ReactNode} [props.actions]  – New Game / Pause buttons row
+ * @param {string}   [props.hint]     – Small text at bottom (e.g. key instructions)
+ * @param {boolean}  [props.fullPage] – Wrap in min-h-screen centering (default true)
+ */
+export default function GameShell({
+  title,
+  onBack,
+  stats = [],
+  children,
+  controls,
+  actions,
+  hint,
+  fullPage = true,
+}) {
+  const inner = (
+    <Card className="bg-zinc-900 border-zinc-700 shadow-2xl">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {onBack && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onBack}
+                className="text-zinc-400 hover:text-white font-mono text-xs px-2"
+              >
+                ← Back
+              </Button>
+            )}
+            <CardTitle className="text-white text-xl tracking-widest font-mono uppercase">
+              {title}
+            </CardTitle>
+          </div>
+          {stats.length > 0 && (
+            <div className="flex gap-3">
+              {stats.map((s, i) => (
+                <div key={s.label} className="flex items-center gap-3">
+                  {i > 0 && <Separator orientation="vertical" className="h-10 bg-zinc-700" />}
+                  <div className="text-center">
+                    <p className="text-zinc-500 text-xs font-mono uppercase tracking-wider">
+                      {s.label}
+                    </p>
+                    <Badge
+                      variant="outline"
+                      className={`${s.borderColor} ${s.textColor} font-mono text-sm min-w-[40px] justify-center`}
+                    >
+                      {s.value}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </CardHeader>
+
+      <CardContent className="flex flex-col items-center gap-4">
+        {children}
+        {controls}
+        {actions && <div className="flex gap-2">{actions}</div>}
+        {hint && <p className="text-zinc-600 text-xs font-mono">{hint}</p>}
+      </CardContent>
+    </Card>
+  );
+
+  if (!fullPage) return inner;
+
+  return (
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+      {inner}
+    </div>
+  );
+}
