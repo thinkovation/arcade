@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@brightlocal/ui-components/button";
 import GameShell from "../components/GameShell";
 import { useButtonPress } from "../hooks/useButtonPress";
+import { isBossActive } from "../lib/bossMode";
 
 const MAZE = [
   "###############",
@@ -143,7 +144,7 @@ export default function PacmanGame({ cellSize = 24, tickMs = 170, onBack, fullPa
 
     const tickLogic = () => {
       const g = gameRef.current;
-      if (g.status !== "RUNNING") return;
+      if (g.status !== "RUNNING" || isBossActive()) return;
 
       // queue input
       const q = keysRef.current;

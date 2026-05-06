@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@brightlocal/ui-components/button";
 import GameShell from "../components/GameShell";
 import { useButtonPress } from "../hooks/useButtonPress";
+import { isBossActive } from "../lib/bossMode";
 
 const rnd = (a, b) => a + Math.random() * (b - a);
 
@@ -117,7 +118,7 @@ export default function SpaceInvadersGame({ width = 480, height = 520, onBack, f
     };
 
     const update = () => {
-      if (gs.status !== "RUNNING") return;
+      if (gs.status !== "RUNNING" || isBossActive()) return;
       gs.tick++;
       const k = keysRef.current, pl = gs.player;
       const spd = 3.5;

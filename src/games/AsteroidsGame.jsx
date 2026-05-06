@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@brightlocal/ui-components/button";
 import GameShell from "../components/GameShell";
 import { useButtonPress } from "../hooks/useButtonPress";
+import { isBossActive } from "../lib/bossMode";
 
 const rnd = (a, b) => a + Math.random() * (b - a);
 
@@ -90,7 +91,7 @@ export default function AsteroidsGame({ width = 480, height = 480, onBack, fullP
     };
 
     const update = () => {
-      if (gs.status !== "RUNNING") return;
+      if (gs.status !== "RUNNING" || isBossActive()) return;
       const k = keysRef.current, sh = gs.ship;
       if (k["ArrowLeft"] || k["a"]) sh.angle -= 0.055;
       if (k["ArrowRight"] || k["d"]) sh.angle += 0.055;

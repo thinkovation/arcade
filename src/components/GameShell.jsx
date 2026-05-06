@@ -1,7 +1,10 @@
+import { useEffect, useSyncExternalStore } from "react";
 import { Badge } from "@brightlocal/ui-components/badge";
 import { Button } from "@brightlocal/ui-components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@brightlocal/ui-components/card";
 import { Separator } from "@brightlocal/ui-components/separator";
+import { isBossActive, setBossActive, subscribeBoss } from "../lib/bossMode";
+import BossSpreadsheet from "./BossSpreadsheet";
 
 /**
  * Shared game chrome — Card with header (back button, title, stat badges),
@@ -27,6 +30,42 @@ export default function GameShell({
   hint,
   fullPage = true,
 }) {
+  const boss = useSyncExternalStore(subscribeBoss, isBossActive, () => false);
+
+  // Esc toggles boss mode; while active, swallow all other keys so the game
+  // beneath does not react. Capture phase wins against per-game window listeners.
+  // Toggle only fires on keydown (not keyup) and ignores OS key-repeat — otherwise
+  // a single tap would flip twice and holding Esc would machine-gun the toggle.
+  useEffect(() => {
+    const onDown = (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.repeat) return;
+        setBossActive(!isBossActive());
+        return;
+      }
+      if (isBossActive()) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    const onUp = (e) => {
+      if (e.key === "Escape" || isBossActive()) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    window.addEventListener("keydown", onDown, { capture: true });
+    window.addEventListener("keyup", onUp, { capture: true });
+    return () => {
+      window.removeEventListener("keydown", onDown, { capture: true });
+      window.removeEventListener("keyup", onUp, { capture: true });
+      // Always exit boss mode when leaving a game (back to menu, switch game).
+      setBossActive(false);
+    };
+  }, []);
+
   const inner = (
     <Card maxWidth="100%" className="bg-zinc-900 border-zinc-700 shadow-2xl py-0 gap-0 w-auto">
       <CardHeader className="px-6 pt-6 pb-3">
@@ -78,11 +117,18 @@ export default function GameShell({
     </Card>
   );
 
-  if (!fullPage) return inner;
-
-  return (
+  const wrapped = fullPage ? (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
       {inner}
     </div>
+  ) : (
+    inner
+  );
+
+  return (
+    <>
+      {wrapped}
+      {boss && <BossSpreadsheet />}
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@brightlocal/ui-components/button";
 import GameShell from "../components/GameShell";
+import { isBossActive, subscribeBoss } from "../lib/bossMode";
 
 const DIFFICULTIES = {
   easy: { cols: 9, rows: 9, mines: 10, label: "Easy" },
@@ -114,12 +115,27 @@ export default function MinesweeperGame({ onBack, fullPage = true }) {
   useEffect(() => {
     if (status !== "RUNNING") return;
     const id = setInterval(() => {
+      if (isBossActive()) return;
       if (startedAtRef.current) {
         setSeconds(Math.floor((performance.now() - startedAtRef.current) / 1000));
       }
     }, 250);
     return () => clearInterval(id);
   }, [status]);
+
+  // Shift startedAt forward by the time spent in boss mode so the timer
+  // truly pauses rather than jumping forward when the overlay closes.
+  useEffect(() => {
+    let bossEnteredAt = null;
+    return subscribeBoss((active) => {
+      if (active) {
+        bossEnteredAt = performance.now();
+      } else if (bossEnteredAt != null && startedAtRef.current) {
+        startedAtRef.current += performance.now() - bossEnteredAt;
+        bossEnteredAt = null;
+      }
+    });
+  }, []);
 
   const changeDifficulty = (key) => {
     if (key === diffKey) return;

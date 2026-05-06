@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@brightlocal/ui-components/button";
 import GameShell from "../components/GameShell";
+import { isBossActive } from "../lib/bossMode";
 
 const COLS = 10;
 const ROWS = 20;
@@ -155,6 +156,7 @@ export default function TetrisGame({ onBack, fullPage = true }) {
   };
 
   const tickDrop = useCallback(() => {
+    if (isBossActive()) return;
     setG((p) => {
       if (p.status !== "RUNNING") return p;
       if (!collides(p.board, p.piece, 0, 1)) {

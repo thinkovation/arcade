@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@brightlocal/ui-components/button";
 import GameShell from "../components/GameShell";
+import { isBossActive } from "../lib/bossMode";
 
 const DIR = { UP: [0, -1], DOWN: [0, 1], LEFT: [-1, 0], RIGHT: [1, 0] };
 const OPPOSITE = { UP: "DOWN", DOWN: "UP", LEFT: "RIGHT", RIGHT: "LEFT" };
@@ -56,6 +57,7 @@ export default function SnakeGame({
   );
 
   const tick = useCallback(() => {
+    if (isBossActive()) return;
     setState((prev) => {
       if (prev.status !== "RUNNING") return prev;
       const d = DIR[prev.nextDir];
