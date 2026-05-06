@@ -4,16 +4,31 @@ import { Card, CardContent } from "@brightlocal/ui-components/card";
 import SnakeGame from "./games/SnakeGame";
 import AsteroidsGame from "./games/AsteroidsGame";
 import SpaceInvadersGame from "./games/SpaceInvadersGame";
+import PacmanGame from "./games/PacmanGame";
+import MinesweeperGame from "./games/MinesweeperGame";
+import TetrisGame from "./games/TetrisGame";
 
 const GAMES = [
   { id: "snake", emoji: "🐍", label: "SNAKE", color: "emerald", desc: "Eat food, grow longer,\navoid yourself" },
   { id: "asteroids", emoji: "🚀", label: "ASTEROIDS", color: "sky", desc: "Blast rocks, survive\nthe asteroid field" },
   { id: "invaders", emoji: "👾", label: "SPACE INVADERS", color: "fuchsia", desc: "Defend Earth from\nthe alien armada" },
+  { id: "pacman", emoji: "👻", label: "PAC-MAN", color: "amber", desc: "Eat the dots,\ndodge the ghosts" },
+  { id: "mines", emoji: "💣", label: "MINESWEEPER", color: "rose", desc: "Find the safe squares,\nflag the bombs" },
+  { id: "tetris", emoji: "🧱", label: "TETRIS", color: "violet", desc: "Stack the blocks,\nclear the lines" },
 ];
 
-const BORDER = { emerald: "hover:border-emerald-600", sky: "hover:border-sky-600", fuchsia: "hover:border-fuchsia-600" };
-const TXT = { emerald: "text-emerald-400", sky: "text-sky-400", fuchsia: "text-fuchsia-400" };
-const BTN = { emerald: "bg-emerald-700 hover:bg-emerald-600", sky: "bg-sky-700 hover:bg-sky-600", fuchsia: "bg-fuchsia-800 hover:bg-fuchsia-700" };
+const BORDER = {
+  emerald: "hover:border-emerald-600", sky: "hover:border-sky-600", fuchsia: "hover:border-fuchsia-600",
+  amber: "hover:border-amber-600", rose: "hover:border-rose-600", violet: "hover:border-violet-600",
+};
+const TXT = {
+  emerald: "text-emerald-400", sky: "text-sky-400", fuchsia: "text-fuchsia-400",
+  amber: "text-amber-400", rose: "text-rose-400", violet: "text-violet-400",
+};
+const BTN = {
+  emerald: "bg-emerald-700 hover:bg-emerald-600", sky: "bg-sky-700 hover:bg-sky-600", fuchsia: "bg-fuchsia-800 hover:bg-fuchsia-700",
+  amber: "bg-amber-700 hover:bg-amber-600", rose: "bg-rose-800 hover:bg-rose-700", violet: "bg-violet-800 hover:bg-violet-700",
+};
 
 function GameSelector({ onSelect }) {
   return (
@@ -55,5 +70,8 @@ export default function ArcadeApp() {
   if (game === "snake") return <SnakeGame onBack={back} />;
   if (game === "asteroids") return <AsteroidsGame onBack={back} />;
   if (game === "invaders") return <SpaceInvadersGame onBack={back} />;
+  if (game === "pacman") return <PacmanGame onBack={back} />;
+  if (game === "mines") return <MinesweeperGame onBack={back} />;
+  if (game === "tetris") return <TetrisGame onBack={back} />;
   return <GameSelector onSelect={setGame} />;
 }

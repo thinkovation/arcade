@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "@brightlocal/tokens/tailwind-preset.css";
-@import "@brightlocal/ui-components";
+@import "@brightlocal/ui-components/tailwind.css";
 
 body {
   margin: 0;
