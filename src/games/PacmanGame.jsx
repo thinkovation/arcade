@@ -27,6 +27,13 @@ const REVERSE = { UP: "DOWN", DOWN: "UP", LEFT: "RIGHT", RIGHT: "LEFT" };
 const DIR_ANGLE = { RIGHT: 0, DOWN: Math.PI / 2, LEFT: Math.PI, UP: -Math.PI / 2 };
 const GHOST_COLORS = ["#ef4444", "#f472b6", "#06b6d4"];
 
+// Player sprite — externalised so it can be swapped without code changes.
+// Drop frames into public/sprites/; rotation is applied at draw time so the
+// source image must face RIGHT (mouth on the right edge) in its natural orientation.
+// If neither frame loads, the renderer falls back to the procedural arc.
+const PLAYER_SPRITE_OPEN = "/sprites/pacman-open.png";
+const PLAYER_SPRITE_CLOSED = "/sprites/pacman-closed.png";
+
 const isWall = (grid, x, y) => !grid[y] || grid[y][x] === undefined || grid[y][x] === "#";
 
 function buildState() {
@@ -124,6 +131,14 @@ export default function PacmanGame({ cellSize = 24, tickMs = 170, onBack, fullPa
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     gameRef.current = buildState();
+
+    // Preload player sprite frames. `complete && naturalWidth > 0` is the loaded check
+    // (covers both happy load and 404 — naturalWidth stays 0 on failure).
+    const playerOpen = new Image();
+    playerOpen.src = PLAYER_SPRITE_OPEN;
+    const playerClosed = new Image();
+    playerClosed.src = PLAYER_SPRITE_CLOSED;
+    const spriteReady = (img) => img.complete && img.naturalWidth > 0;
 
     let lastUiKey = "";
     const emitUi = () => {
@@ -225,19 +240,34 @@ export default function PacmanGame({ cellSize = 24, tickMs = 170, onBack, fullPa
         }
       }
 
-      // pacman
+      // pacman — sprite if loaded, procedural arc as fallback
       const px = g.player.x * cellSize + cellSize / 2;
       const py = g.player.y * cellSize + cellSize / 2;
-      const mouth = (Math.sin(frameRef.current * 0.4) * 0.5 + 0.5) * 0.6 + 0.05;
       const a = DIR_ANGLE[g.player.dir];
-      ctx.fillStyle = "#facc15";
-      ctx.shadowColor = "#facc15"; ctx.shadowBlur = 6;
-      ctx.beginPath();
-      ctx.arc(px, py, cellSize / 2 - 2, a + mouth, a - mouth + Math.PI * 2);
-      ctx.lineTo(px, py);
-      ctx.closePath();
-      ctx.fill();
-      ctx.shadowBlur = 0;
+      const openReady = spriteReady(playerOpen);
+      const closedReady = spriteReady(playerClosed);
+      if (openReady || closedReady) {
+        // Alternate every ~8 frames (~130ms at 60fps) for the chomp. If only one
+        // frame is provided, just draw it static.
+        const useClosed = closedReady && (!openReady || Math.floor(frameRef.current / 8) % 2 === 1);
+        const sprite = useClosed ? playerClosed : playerOpen;
+        const size = cellSize - 4;
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.rotate(a);
+        ctx.drawImage(sprite, -size / 2, -size / 2, size, size);
+        ctx.restore();
+      } else {
+        const mouth = (Math.sin(frameRef.current * 0.4) * 0.5 + 0.5) * 0.6 + 0.05;
+        ctx.fillStyle = "#facc15";
+        ctx.shadowColor = "#facc15"; ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.arc(px, py, cellSize / 2 - 2, a + mouth, a - mouth + Math.PI * 2);
+        ctx.lineTo(px, py);
+        ctx.closePath();
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
 
       // ghosts
       const frightened = g.frightTimer > 0;
